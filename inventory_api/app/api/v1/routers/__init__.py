@@ -12,7 +12,9 @@ api_router.include_router(locais.router, prefix="/locais", tags=["🏢 Locais (A
 from . import categorias
 api_router.include_router(categorias.router, prefix="/categorias", tags=["🏷️  Categorias de Ativos"])
 
+from . import ativos
+api_router.include_router(ativos.router, prefix="/ativos", tags=["💻 Ativos de TI (Hardware)"])
+
 # Futuramente:
-# api_router.include_router(ativos.router, prefix="/ativos", tags=["💻 Ativos de TI (Hardware)"])
 # api_router.include_router(licencas.router, prefix="/licencas", tags=["🔑 Licenças (Software)"])
 # api_router.include_router(dashboard.router, prefix="/dashboard", tags=["📊 Dashboards"])
