@@ -63,22 +63,39 @@
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.total">0</dd>
                             </div>
                         </div>
-                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-green-500">
+                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-blue-500">
                             <div class="p-5">
                                 <dt class="text-sm font-medium text-gray-500 truncate">Em Uso / Campo</dt>
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.em_uso">0</dd>
                             </div>
                         </div>
-                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-yellow-500">
+                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-green-500">
                             <div class="p-5">
-                                <dt class="text-sm font-medium text-gray-500 truncate">Estoque Base (Ociosos)</dt>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Estoque Base / Prontos</dt>
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.estoque">0</dd>
                             </div>
                         </div>
-                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-red-500">
+                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-yellow-500">
                             <div class="p-5">
-                                <dt class="text-sm font-medium text-gray-500 truncate">🔴 Em Manutenção / Avaria</dt>
-                                <dd class="mt-1 text-3xl font-semibold text-red-600" x-text="kpis.manutencao">0</dd>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Atenção / Reservados</dt>
+                                <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.reservado">0</dd>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-red-500 sm:col-span-2 lg:col-span-4">
+                            <div class="p-5 flex justify-between items-center">
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">🔴 Avaria / Manutenção</dt>
+                                    <dd class="mt-1 text-3xl font-semibold text-red-600" x-text="kpis.manutencao">0</dd>
+                                </div>
+                                <div class="text-red-300">
+                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                        </path>
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -112,8 +129,9 @@
                                                         <!-- Logica de renderizar nossa Bolinha Colorida -->
                                                         <div class="flex items-center">
                                                             <div class="h-3 w-3 rounded-full mr-2 shadow-sm" :class="{
-                                            'bg-green-500': ativo.status === 'em_uso',
-                                            'bg-yellow-400': ativo.status === 'estoque' || ativo.status === 'reservado',
+                                            'bg-blue-500': ativo.status === 'em_uso',
+                                            'bg-green-500': ativo.status === 'estoque',
+                                            'bg-yellow-400': ativo.status === 'reservado',
                                             'bg-red-500': ativo.status === 'em_manutencao' || ativo.status === 'descartado'
                                         }">
                                                             </div>
@@ -234,6 +252,7 @@
                 total: 0,
                 em_uso: 0,
                 estoque: 0,
+                reservado: 0,
                 manutencao: 0
             },
 
@@ -298,6 +317,7 @@
                     this.kpis.total = this.ativos.length;
                     this.kpis.em_uso = this.ativos.filter(a => a.status === 'em_uso').length;
                     this.kpis.estoque = this.ativos.filter(a => a.status === 'estoque').length;
+                    this.kpis.reservado = this.ativos.filter(a => a.status === 'reservado').length;
                     this.kpis.manutencao = this.ativos.filter(a => ['em_manutencao', 'descartado'].includes(a.status)).length;
                 } catch (e) {
                     console.error("Falha na comunicação de ativos.");
