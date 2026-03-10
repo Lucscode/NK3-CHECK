@@ -1,27 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" :class="{ 'dark': darkMode }" x-data="appData()">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}NK3 Inventário TI{% endblock %}</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+
     <!-- Configurações PWA Opcionais -->
     <meta name="theme-color" content="#ffffff">
-    
+
     <style>
         /* Custom scrollbar para tabelas grandes */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans antialiased" x-data="appData()">
+
+<body
+    class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased transition-colors duration-200">
 
     {% block content %}
     {% endblock %}
@@ -32,7 +56,8 @@
             Alpine.data('appData', () => ({
                 token: localStorage.getItem('token') || null,
                 user: JSON.parse(localStorage.getItem('user')) || null,
-                
+                darkMode: localStorage.getItem('darkMode') === 'true',
+
                 init() {
                     // Se não tiver token e não estiver na página de login, redireciona
                     const isLoginPage = window.location.pathname.includes('/login');
@@ -42,7 +67,12 @@
                         window.location.href = '/dashboard';
                     }
                 },
-                
+
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                },
+
                 logout() {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
@@ -52,4 +82,5 @@
         })
     </script>
 </body>
+
 </html>
