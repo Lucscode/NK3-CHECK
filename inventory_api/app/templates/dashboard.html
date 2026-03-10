@@ -45,8 +45,12 @@
     <div class="flex flex-col w-0 flex-1 overflow-hidden">
         <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none">
             <div class="py-6">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <h1 class="text-2xl font-semibold text-gray-900">Visão Geral de Hardware</h1>
+                    <button @click="abrirModalNovoAtivo()"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                        + Novo Equipamento
+                    </button>
                 </div>
 
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
@@ -142,12 +146,90 @@
             </div>
         </main>
     </div>
+
+    <!-- Modal Cadastro Ativo -->
+    <div x-show="showNovoModal" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true" x-cloak>
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showNovoModal" x-transition.opacity
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+                @click="showNovoModal = false"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div x-show="showNovoModal" x-transition
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form @submit.prevent="salvarAtivo()">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">Cadastrar Novo
+                            Equipamento</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Patrimônio / Etiqueta</label>
+                                <input type="text" x-model="novoAtivo.patrimonio" required placeholder="Ex: NTB-001"
+                                    class="mt-1 border border-gray-300 block w-full shadow-sm sm:text-sm rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Marca</label>
+                                <input type="text" x-model="novoAtivo.marca" required placeholder="Ex: Dell"
+                                    class="mt-1 border border-gray-300 block w-full shadow-sm sm:text-sm rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Modelo</label>
+                                <input type="text" x-model="novoAtivo.modelo" required placeholder="Ex: Latitude 3420"
+                                    class="mt-1 border border-gray-300 block w-full shadow-sm sm:text-sm rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Categoria</label>
+                                <select x-model="novoAtivo.categoria_id" required
+                                    class="mt-1 border border-gray-300 block w-full shadow-sm sm:text-sm rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Selecione...</option>
+                                    <template x-for="cat in categorias" :key="cat.id">
+                                        <option :value="cat.id" x-text="cat.nome"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Local Base</label>
+                                <select x-model="novoAtivo.local_id" required
+                                    class="mt-1 border border-gray-300 block w-full shadow-sm sm:text-sm rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Selecione...</option>
+                                    <template x-for="loc in locais" :key="loc.id">
+                                        <option :value="loc.id" x-text="loc.nome"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                        <button type="submit"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Salvar Aparelho
+                        </button>
+                        <button type="button" @click="showNovoModal = false"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('dashboardData', () => ({
             ativos: [],
+            categorias: [],
+            locais: [],
+            showNovoModal: false,
+            novoAtivo: {
+                patrimonio: '',
+                marca: '',
+                modelo: '',
+                status: 'estoque',
+                categoria_id: '',
+                local_id: ''
+            },
             kpis: {
                 total: 0,
                 em_uso: 0,
@@ -157,6 +239,47 @@
 
             init() {
                 this.carregarAtivos();
+                this.carregarFiltros();
+            },
+
+            async carregarFiltros() {
+                try {
+                    const reqCat = await fetch('/api/v1/categorias/', { headers: { 'Authorization': `Bearer ${appData().token}` } });
+                    this.categorias = await reqCat.json();
+
+                    const reqLoc = await fetch('/api/v1/locais/', { headers: { 'Authorization': `Bearer ${appData().token}` } });
+                    this.locais = await reqLoc.json();
+                } catch (e) {
+                    console.error("Falha ao carregar dependências do formulário.");
+                }
+            },
+
+            abrirModalNovoAtivo() {
+                this.novoAtivo = { patrimonio: '', marca: '', modelo: '', status: 'estoque', categoria_id: '', local_id: '' };
+                this.showNovoModal = true;
+            },
+
+            async salvarAtivo() {
+                try {
+                    const response = await fetch('/api/v1/ativos/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${appData().token}`
+                        },
+                        body: JSON.stringify(this.novoAtivo)
+                    });
+
+                    if (response.ok) {
+                        this.showNovoModal = false;
+                        await this.carregarAtivos(); // recarrega a tabela e PDEs automáticos
+                    } else {
+                        const errData = await response.json();
+                        alert(`Erro: ${errData.detail || 'Falha ao salvar. Verifique se a etiqueta (Patrimônio) já existe.'}`);
+                    }
+                } catch (e) {
+                    alert("Erro de conexão na gravação do novo aparelho.");
+                }
             },
 
             async carregarAtivos() {
