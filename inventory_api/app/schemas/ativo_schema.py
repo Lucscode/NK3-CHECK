@@ -70,3 +70,9 @@ class AtribuirSchema(BaseModel):
 class StatusUpdate(BaseModel):
     status: str
     observacao: Optional[str] = "Mudança manual de status via painel"
+
+class DanoMobileSchema(BaseModel):
+    patrimonio: str
+    status: str = "em_manutencao"
+    observacao_dano: str
+    foto_nome: Optional[str] = None

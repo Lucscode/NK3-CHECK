@@ -106,3 +106,30 @@ async def recolher_ativo(
     """ Regra de Logística: Tira do colaborador, devolve para a TI com Status: Estoque """
     ativo = await mudar_status_ativo(db, id, "estoque", current_user.id, "Equipamento recolhido para a matriz TI")
     return {"message": f"Ativo devolvido para o estoque."}
+
+from app.schemas.ativo_schema import DanoMobileSchema
+@router.post("/triagem-mobile-mock")
+async def registrar_avaria_mobile(
+    payload: DanoMobileSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """ Endpoint dedicado para atender ao celular PWA do Técnico (Triagem Logística e Câmera) """
+    
+    # 1. Encontra a máquina pela etiqueta bipada
+    result = await db.execute(select(Ativo).filter(Ativo.patrimonio == payload.patrimonio))
+    ativo = result.scalars().first()
+    
+    if not ativo:
+         raise HTTPException(status_code=404, detail="Patrimônio não localizado no estoque global.")
+    
+    # 2. Chama a regra de negócio poderosa: muda o status e recorta a posse do usuário anterior
+    ativo_atualizado = await mudar_status_ativo(
+        db=db,
+        ativo_id=ativo.id,
+        novo_status=payload.status,
+        usuario_id=current_user.id,
+        observacao=f"AVARIA (App Mobile). Dano relatado: {payload.observacao_dano}. Evidência: {payload.foto_nome}"
+    )
+    
+    return {"message": "Avaria registrada e status logístico atualizado.", "patrimonio": ativo_atualizado.patrimonio}

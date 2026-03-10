@@ -33,6 +33,14 @@ async def view_login(request: Request):
 async def view_dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
+@app.get("/scanner", response_class=HTMLResponse)
+async def view_scanner_mobile(request: Request):
+    return templates.TemplateResponse("scanner.html", {"request": request})
+
+@app.get("/ficha/{id}", response_class=HTMLResponse)
+async def view_ficha_tecnica(request: Request, id: str):
+    return templates.TemplateResponse("ficha_tecnica.html", {"request": request, "id": id})
+
 @app.get("/", response_class=HTMLResponse)
 async def view_raiz(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})

@@ -117,8 +117,10 @@
                                                                 x-text="ativo.status.replace('_', ' ').toUpperCase()"></span>
                                                         </div>
                                                     </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                                        x-text="ativo.patrimonio"></td>
+                                                    <td
+                                                        class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-bold hover:underline">
+                                                        <a :href="'/ficha/' + ativo.id" x-text="ativo.patrimonio"></a>
+                                                    </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm text-gray-900"
                                                             x-text="ativo.marca + ' ' + ativo.modelo"></div>
