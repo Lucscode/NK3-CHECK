@@ -15,7 +15,7 @@
                         class="flex items-center flex-shrink-0 px-4 font-bold text-xl text-blue-800 dark:text-blue-400">
                         📊 NK3 Inventário
                     </div>
-                    <nav class="mt-5 flex-1 px-2 bg-white space-y-1">
+                    <nav class="mt-5 flex-1 px-2 bg-white dark:bg-gray-800 space-y-1">
                         <a href="#"
                             class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
                             🎯 Dashboard (Você está aqui)
@@ -86,32 +86,35 @@
 
                     <!-- KPIs (Nossa Tela 1 - Etapa 5) -->
                     <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
                             <div class="p-5">
                                 <dt class="text-sm font-medium text-gray-500 truncate">Total de Ativos Cadastrados</dt>
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.total">0</dd>
                             </div>
                         </div>
-                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-blue-500">
+                        <div
+                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-blue-500">
                             <div class="p-5">
                                 <dt class="text-sm font-medium text-gray-500 truncate">Em Uso / Campo</dt>
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.em_uso">0</dd>
                             </div>
                         </div>
-                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-green-500">
+                        <div
+                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-green-500">
                             <div class="p-5">
                                 <dt class="text-sm font-medium text-gray-500 truncate">Estoque Base / Prontos</dt>
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.estoque">0</dd>
                             </div>
                         </div>
-                        <div class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-yellow-500">
+                        <div
+                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-yellow-500">
                             <div class="p-5">
                                 <dt class="text-sm font-medium text-gray-500 truncate">Atenção / Reservados</dt>
                                 <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.reservado">0</dd>
                             </div>
                         </div>
                         <div
-                            class="bg-white overflow-hidden shadow rounded-lg border-b-4 border-red-500 sm:col-span-2 lg:col-span-4">
+                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-red-500 sm:col-span-2 lg:col-span-4">
                             <div class="p-5 flex justify-between items-center">
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 truncate">🔴 Avaria / Manutenção</dt>
