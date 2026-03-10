@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Login - NK3 Inventário TI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+    x-data="{ email: '', password: '', error: null, loading: false }">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Inventário de TI
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Faça login para acessar o painel corporativo
+            </p>
+        </div>
+
+        <!-- Alerta de Erro Dinâmico -->
+        <div x-show="error" x-cloak class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-red-700" x-text="error"></p>
+                </div>
+            </div>
+        </div>
+
+        <form class="mt-8 space-y-6" @submit.prevent="fazerLogin()">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="email-address" class="sr-only">E-mail corporativo</label>
+                    <input id="email-address" name="email" type="email" autocomplete="email" required x-model="email"
+                        class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                        placeholder="E-mail corporativo">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Senha</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required
+                        x-model="password"
+                        class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                        placeholder="Senha">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" :disabled="loading"
+                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                    <span x-show="!loading">Entrar no Sistema</span>
+                    <span x-show="loading" x-cloak>Autenticando...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function fazerLogin() {
+        this.loading = true;
+        this.error = null;
+
+        // Padrão do OAuth2 Password Bearer da Rota FastAPI `/api/v1/auth/login`
+        const formData = new URLSearchParams();
+        formData.append('username', this.email);
+        formData.append('password', this.password);
+
+        fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Credenciais inválidas ou acesso negado.');
+                return response.json();
+            })
+            .then(data => {
+                // Salva token JWT e info do usuário no LocalStorage
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify({ role: data.role }));
+                // Redireciona via navegador
+                window.location.href = '/dashboard';
+            })
+            .catch(error => {
+                this.error = error.message;
+                this.loading = false;
+            });
+    }
+</script>
+{% endblock %}
