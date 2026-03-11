@@ -208,6 +208,14 @@
                                     </template>
                                 </select>
                             </div>
+                            <div class="col-span-2 mt-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                    <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    Foto / Evidência (Opcional)
+                                </label>
+                                <input type="file" accept="image/*" capture="environment" @change="fotoFile = $event.target.files[0]"
+                                    class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-400 dark:file:bg-gray-700 dark:file:text-gray-200">
+                            </div>
                         </div>
                     </div>
                     <div
@@ -242,6 +250,7 @@
                 categoria_id: '',
                 local_id: ''
             },
+            fotoFile: null,
             kpis: {
                 total: 0,
                 em_uso: 0,
@@ -269,6 +278,7 @@
 
             abrirModalNovoAtivo() {
                 this.novoAtivo = { patrimonio: '', marca: '', modelo: '', status: 'estoque', categoria_id: '', local_id: '' };
+                this.fotoFile = null;
                 this.showNovoModal = true;
             },
 
@@ -284,6 +294,23 @@
                     });
 
                     if (response.ok) {
+                        const ativoCriado = await response.json();
+                        
+                        // Rotina para a Foto (Câmera)
+                        if (this.fotoFile) {
+                            try {
+                                const formData = new FormData();
+                                formData.append("file", this.fotoFile);
+                                await fetch(`/api/v1/ativos/${ativoCriado.id}/imagens`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${appData().token}` },
+                                    body: formData
+                                });
+                            } catch(errCam) {
+                                console.error("Erro ao subir a imagem da câmera", errCam);
+                            }
+                        }
+
                         this.showNovoModal = false;
                         await this.carregarAtivos(); // recarrega a tabela e PDEs automáticos
                     } else {

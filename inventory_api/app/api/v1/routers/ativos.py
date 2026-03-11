@@ -1,11 +1,14 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+import os
+import uuid
+import shutil
+from fastapi import APIRouter, Depends, Query, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from app.db.session import get_db
 from app.api.deps import get_current_user
-from app.db.models import User, Ativo
+from app.db.models import User, Ativo, AtivoImagem
 from app.schemas.ativo_schema import AtivoCreate, AtivoResponse
 from app.services.ativo_service import criar_ativo
 
@@ -59,6 +62,42 @@ async def detalhar_ativo(
     if not ativo:
         raise HTTPException(status_code=404, detail="Ativo não encontrado")
     return ativo
+
+@router.post("/{id}/imagens")
+async def upload_imagem_ativo(
+    id: str,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """ Upload de imagem física (Ex: Câmera do Celular) para o equipamento selecionado. """
+    result = await db.execute(select(Ativo).filter(Ativo.id == id))
+    ativo = result.scalars().first()
+    
+    if not ativo:
+        raise HTTPException(status_code=404, detail="Ativo não encontrado")
+        
+    os.makedirs(os.path.join("uploads", "ativos"), exist_ok=True)
+    
+    # Extrai extensão (png, jpg, jpeg) e gera nome único baseado no patrimônio
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+    novo_nome = f"{ativo.patrimonio}_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = os.path.join("uploads", "ativos", novo_nome)
+    
+    # Salva o binário na pasta de anexos locais Windows
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Salva a referência na tabela BD local
+    nova_img = AtivoImagem(
+        ativo_id=ativo.id,
+        url_imagem=f"/uploads/ativos/{novo_nome}",
+        tipo="geral"
+    )
+    db.add(nova_img)
+    await db.commit()
+    
+    return {"message": "Imagem salva com sucesso.", "url": nova_img.url_imagem}
 
 from app.schemas.ativo_schema import AtribuirSchema
 from app.services.ativo_service import mudar_status_ativo

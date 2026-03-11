@@ -36,5 +36,34 @@ async def init_db():
         else:
             print("Usuário Admin já existe.")
 
+        # Verificar Categorias Fixas
+        from app.db.models import Categoria, Local
+        res_cat = await db.execute(select(Categoria))
+        if not res_cat.scalars().first():
+            print("Criando categorias padrão...")
+            cats = [
+                Categoria(nome="Notebook / Laptop", prefixo_patrimonio="NTB"),
+                Categoria(nome="Desktop / Gabinete", prefixo_patrimonio="DSK"),
+                Categoria(nome="Monitor", prefixo_patrimonio="MNT"),
+                Categoria(nome="Smartphone / Celular", prefixo_patrimonio="CEL"),
+                Categoria(nome="Periférico / Outros", prefixo_patrimonio="PRF")
+            ]
+            db.add_all(cats)
+            await db.commit()
+
+        # Verificar Locais Fixos
+        res_loc = await db.execute(select(Local))
+        if not res_loc.scalars().first():
+            print("Criando locais padrão...")
+            locs = [
+                Local(nome="Matriz - TI (Estoque Base)"),
+                Local(nome="Filial Norte"),
+                Local(nome="Home Office (Campo)")
+            ]
+            db.add_all(locs)
+            await db.commit()
+            
+        print("Tabelas de suporte (Categorias e Locais) verificadas e populadas se necessário!")
+
 if __name__ == "__main__":
     asyncio.run(init_db())
