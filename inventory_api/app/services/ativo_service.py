@@ -4,6 +4,8 @@ from sqlalchemy.future import select
 from fastapi import HTTPException
 from app.db.models import Ativo, HistoricoMovimentacao
 from app.schemas.ativo_schema import AtivoCreate, AtivoUpdate
+from app.services.exportador_csv import exportar_para_csv
+import asyncio
 
 async def criar_ativo(db: AsyncSession, ativo_data: AtivoCreate, usuario_id: str):
     # Regra 1 e 2: Verifica Unicidade de Patrimônio e Serial
@@ -32,6 +34,9 @@ async def criar_ativo(db: AsyncSession, ativo_data: AtivoCreate, usuario_id: str
     db.add(historico)
     await db.commit()
     await db.refresh(novo_ativo)
+    
+    # Executa a geração de relatório em background (fire and forget)
+    asyncio.create_task(exportar_para_csv())
     
     return novo_ativo
 
@@ -65,5 +70,8 @@ async def mudar_status_ativo(
     db.add(historico)
     await db.commit()
     await db.refresh(ativo)
+    
+    # Atualiza o arquivo CSV assincronamente
+    asyncio.create_task(exportar_para_csv())
     
     return ativo
