@@ -17,16 +17,16 @@
                     </div>
                     <nav class="mt-5 flex-1 px-2 bg-white dark:bg-gray-800 space-y-1">
                         <a href="/dashboard"
-                            class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            🎯 Dashboard (Você está aqui)
+                            class="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            🎯 Dashboard
                         </a>
                         <a href="/ativos"
                             class="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
                             💻 Todos os Ativos
                         </a>
                         <a href="/garantias"
-                            class="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            📉 Garantias & Licenças
+                            class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            📉 Garantias & Licenças (Você está aqui)
                         </a>
                     </nav>
                 </div>
@@ -52,21 +52,18 @@
             <div class="py-6">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <h1 class="text-2xl font-semibold text-gray-900 dark:text-white transition-colors duration-200">
-                        Visão Geral de Hardware</h1>
+                        Gestão de Licenças e Vencimentos</h1>
 
                     <div class="flex items-center space-x-4">
-                        <!-- Botão Dark Mode Superior Direito -->
                         <button type="button" @click="toggleDarkMode()"
                             class="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             title="Alternar Tema">
-                            <!-- Ícone Lua (Escuro) -->
                             <svg x-show="!darkMode" class="w-6 h-6" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
                                 </path>
                             </svg>
-                            <!-- Ícone Sol (Claro) -->
                             <svg x-show="darkMode" x-cloak class="w-6 h-6" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -74,144 +71,20 @@
                                 </path>
                             </svg>
                         </button>
-
-                        <button @click="abrirModalNovoAtivo()"
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                            + Novo Equipamento
-                        </button>
                     </div>
                 </div>
 
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-
-                    <!-- KPIs (Nossa Tela 1 - Etapa 5) -->
-                    <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-                            <div class="p-5">
-                                <dt class="text-sm font-medium text-gray-500 truncate">Total de Ativos Cadastrados</dt>
-                                <dd class="mt-1 text-3xl font-semibold text-gray-900" x-text="kpis.total">0</dd>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-blue-500">
-                            <div class="p-5">
-                                <dt
-                                    class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
-                                    <div class="h-3 w-3 rounded-full bg-blue-500 mr-2 shadow-sm"></div>
-                                    Em Uso / Campo
-                                </dt>
-                                <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white"
-                                    x-text="kpis.em_uso">0</dd>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-green-500">
-                            <div class="p-5">
-                                <dt
-                                    class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
-                                    <div class="h-3 w-3 rounded-full bg-green-500 mr-2 shadow-sm"></div>
-                                    Estoque Base / Prontos
-                                </dt>
-                                <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white"
-                                    x-text="kpis.estoque">0</dd>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-yellow-500">
-                            <div class="p-5">
-                                <dt
-                                    class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
-                                    <div class="h-3 w-3 rounded-full bg-yellow-400 mr-2 shadow-sm"></div>
-                                    Atenção / Reservados
-                                </dt>
-                                <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white"
-                                    x-text="kpis.reservado">0</dd>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-b-4 border-red-500 sm:col-span-2 lg:col-span-4">
-                            <div class="p-5 flex justify-between items-center">
-                                <div>
-                                    <dt
-                                        class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
-                                        <div class="h-3 w-3 rounded-full bg-red-500 mr-2 shadow-sm"></div>
-                                        Avaria / Manutenção
-                                    </dt>
-                                    <dd class="mt-1 text-3xl font-semibold text-red-600 dark:text-red-500"
-                                        x-text="kpis.manutencao">0</dd>
-                                </div>
-                                <div class="text-red-300">
-                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                        </path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tabela Principal do Inventário -->
-                    <div class="mt-8 flex flex-col">
-                        <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                            <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                                <div
-                                    class="shadow overflow-hidden border-b border-gray-200 dark:border-gray-700 sm:rounded-lg">
-                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead class="bg-gray-50 dark:bg-gray-800">
-                                            <tr>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                    Status Visual</th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                    Patrimônio</th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                    Equipamento</th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                    Local</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody
-                                            class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                            <template x-for="ativo in ativos" :key="ativo.id">
-                                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                        <!-- Logica de renderizar nossa Bolinha Colorida -->
-                                                        <div class="flex items-center">
-                                                            <div class="h-3 w-3 rounded-full mr-2 shadow-sm" :class="{
-                                            'bg-blue-500': ativo.status === 'em_uso',
-                                            'bg-green-500': ativo.status === 'estoque',
-                                            'bg-yellow-400': ativo.status === 'reservado',
-                                            'bg-red-500': ativo.status === 'em_manutencao' || ativo.status === 'descartado'
-                                        }">
-                                                            </div>
-                                                            <span
-                                                                class="text-sm font-medium text-gray-900 dark:text-gray-200"
-                                                                x-text="ativo.status.replace('_', ' ').toUpperCase()"></span>
-                                                        </div>
-                                                    </td>
-                                                    <td
-                                                        class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 dark:text-blue-400 font-bold hover:underline">
-                                                        <a :href="'/ficha/' + ativo.id" x-text="ativo.patrimonio"></a>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                        <div class="text-sm text-gray-900 dark:text-gray-100"
-                                                            x-text="ativo.marca + ' ' + ativo.modelo"></div>
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400"
-                                                            x-text="'S/N: ' + (ativo.numero_serie || 'N/A')"></div>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
-                                                        x-text="ativo.categoria ? ativo.categoria.nome : 'N/A'"></td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-8">
+                    <div class="text-center bg-white dark:bg-gray-800 rounded-lg shadow px-4 py-16 sm:px-6 lg:px-8 border border-gray-200 dark:border-gray-700">
+                        <svg class="mx-auto h-16 w-16 text-blue-500 dark:text-blue-400 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Módulo em Construção</h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">O novo controle de Garantias Temporais e Anexação Direta de NFs e Licenças de Software estará disponível nas próximas atualizações do painel corporativo.</p>
+                        <div class="mt-6">
+                            <a href="/dashboard" class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Voltar ao Dashboard Geral
+                            </a>
                         </div>
                     </div>
 

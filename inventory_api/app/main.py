@@ -41,6 +41,14 @@ async def view_scanner_mobile(request: Request):
 async def view_ficha_tecnica(request: Request, id: str):
     return templates.TemplateResponse("ficha_tecnica.html", {"request": request, "id": id})
 
+@app.get("/ativos", response_class=HTMLResponse)
+async def view_ativos(request: Request):
+    return templates.TemplateResponse("ativos.html", {"request": request})
+
+@app.get("/garantias", response_class=HTMLResponse)
+async def view_garantias(request: Request):
+    return templates.TemplateResponse("garantias.html", {"request": request})
+
 @app.get("/", response_class=HTMLResponse)
 async def view_raiz(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
