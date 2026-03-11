@@ -7,13 +7,15 @@ from app.db.models import Ativo, Categoria, Local, Colaborador, User, HistoricoM
 
 async def rodar_carga():
     """ 
-    Script de Migração: 
-    Lê a planilha velha, cruza Chaves Estrangeiras, 
-    Joga as 'sobras' (Memoria, CPU, HD) para a coluna inteligente JSONB e salva.
+    Script de Migração Adaptado para a Planilha Real do Cliente:
+    Mapeia os nomes das colunas enviados na imagem.
     """
     print("Iniciando Motor de Carga ETL do Inventário...")
     df = pd.read_csv("data_mock/planilha_legada.csv", keep_default_na=False)
     
+    # Normalizar os nomes das colunas (remover espaços extras nas pontas)
+    df.columns = df.columns.str.strip()
+
     async with AsyncSessionLocal() as db:
         
         # O Admin Master System fará essa carga
@@ -28,28 +30,40 @@ async def rodar_carga():
 
         for index, row in df.iterrows():
             try:
-                patrimonio = str(row['PATRIMONIO']).strip()
-                if not patrimonio: continue
+                # Função segura para pegar valor da coluna se ela existir na planilha
+                def get_val(col_names):
+                    for col in col_names:
+                        if col in df.columns:
+                            val = row[col]
+                            return str(val).strip() if pd.notna(val) and str(val).strip() != "" else None
+                    return None
+
+                # Mapeamento Flexível
+                patrimonio = get_val(['Nome da máquina', 'Nome da máqu', 'PATRIMONIO', 'Hostname', 'Patrimonio'])
+                if not patrimonio: 
+                    continue # Se não tem nome da máquina, pula a linha
                 
-                # 1. Verifica se já existe para evitar crash
+                # 1. Verifica se já existe
                 existente = await db.execute(select(Ativo).filter(Ativo.patrimonio == patrimonio))
                 if existente.scalars().first():
                     print(f"Pulo: {patrimonio} já existe no sistema novo.")
                     continue
 
-                # 2. Resolução Dinâmica de FKs (Cria se não existir, algo comum em migrações)
+                # 2. Resolução Dinâmica de FKs
                 
-                # Categoria (Notebook, Celular)
-                tipo = str(row['TIPO_EQUIPAMENTO']).strip()
+                # Categoria (Como não vi na imagem, vamos tentar achar ou usar um padrão)
+                tipo = get_val(['Tipo de Equipamento', 'Tipo', 'Categoria', 'TIPO_EQUIPAMENTO']) or 'Equipamento TI'
                 cat_result = await db.execute(select(Categoria).filter(Categoria.nome == tipo))
                 categoria = cat_result.scalars().first()
                 if not categoria:
-                    categoria = Categoria(nome=tipo, prefixo_patrimonio=tipo[:3].upper())
+                    # Cria a categoria com o prefixo sendo as 3 primeiras letras
+                    prefixo = tipo[:3].upper() if len(tipo) >= 3 else 'EQP'
+                    categoria = Categoria(nome=tipo, prefixo_patrimonio=prefixo)
                     db.add(categoria)
                     await db.flush()
                 
                 # Local
-                local_nome = str(row['LOCAL']).strip()
+                local_nome = get_val(['Local', 'LOCAL']) or 'Não Informado'
                 loc_result = await db.execute(select(Local).filter(Local.nome == local_nome))
                 local = loc_result.scalars().first()
                 if not local:
@@ -57,40 +71,80 @@ async def rodar_carga():
                     db.add(local)
                     await db.flush()
                     
-                # Colaborador (Pode estar vazio se tiver no estoque)
+                # Colaborador e Status
+                colab_nome = get_val(['Colaborador', 'NOME_COLABORADOR'])
+                status_planilha = get_val(['Status', 'STATUS'])
                 colaborador_id = None
-                status_atual = 'estoque'
-                colab_nome = str(row['NOME_COLABORADOR']).strip()
                 
-                if colab_nome:
+                # Lógica para Status: Se tem colaborador, está em_uso, senão está livre/estoque
+                status_atual = 'estoque'
+                if colab_nome and colab_nome.upper() not in ['ESTOQUE', 'LIVRE', 'TI', '-', 'N/A']:
                     col_result = await db.execute(select(Colaborador).filter(Colaborador.nome_completo == colab_nome))
                     colaborador = col_result.scalars().first()
                     if not colaborador:
                         # Email placeholder
-                        colaborador = Colaborador(nome_completo=colab_nome, email=f"{colab_nome.split()[0].lower()}@nk3.com.br", setor="Geral")
+                        email_base = colab_nome.split()[0].lower() if len(colab_nome.split()) > 0 else 'usuario'
+                        colaborador = Colaborador(nome_completo=colab_nome, email=f"{email_base}@nk3.com.br", setor="Geral")
                         db.add(colaborador)
                         await db.flush()
                     colaborador_id = colaborador.id
                     status_atual = 'em_uso'
+                elif status_planilha and 'ESTOQUE' in status_planilha.upper():
+                    status_atual = 'estoque'
+                elif status_planilha and ('MANUTEN' in status_planilha.upper() or 'DEFEITO' in status_planilha.upper()):
+                    status_atual = 'manutencao'
                 
-                # 3. O Poder do Híbrido: Empacotar os RESTOS em JSONB (Adeus Coluna Vazia do IP Phone)
+                # Especificações Técnicas Híbridas (O que sobrar vai para o JSON)
                 especificacoes = {}
-                if row['MEMORIA_RAM']: especificacoes['memoria_ram'] = row['MEMORIA_RAM']
-                if row['ARMAZENAMENTO']: especificacoes['armazenamento'] = row['ARMAZENAMENTO']
-                if row['PROCESSADOR']: especificacoes['processador'] = row['PROCESSADOR']
+                memoria = get_val(['Memória', 'Memoria', 'MEMORIA_RAM'])
+                if memoria: especificacoes['memoria_ram'] = memoria
                 
-                # 4. Criando Entidade Principal e Injetando o JSONB
+                disco = get_val(['Disco', 'ARMAZENAMENTO', 'Armazenamento'])
+                if disco: especificacoes['armazenamento'] = disco
+                
+                processador = get_val(['Processador', 'PROCESSADOR'])
+                if processador: especificacoes['processador'] = processador
+                
+                so = get_val(['Sistema Operacional', 'SO'])
+                if so: especificacoes['sistema_operacional'] = so
+                
+                garantia = get_val(['Data fim de Garant', 'Data fim de Garantia', 'Garantia'])
+                if garantia: especificacoes['data_fim_garantia'] = garantia
+                
+                # Observações Gerais
+                obs_parts = []
+                obs = get_val(['Observação', 'OBS'])
+                if obs: obs_parts.append(f"Obs legada: {obs}")
+                
+                novo_usado = get_val(['Novo ou usado', 'Novo ou usad'])
+                if novo_usado: obs_parts.append(f"Condição Carga: {novo_usado}")
+                
+                licenca = get_val(['Licença Antivírus'])
+                if licenca: obs_parts.append(f"Licença AV: {licenca}")
+
+                contato = get_val(['Contato'])
+                if contato: obs_parts.append(f"Contato: {contato}")
+
+                termo = get_val(['Termo de responsa', 'Termo de responsabilidade'])
+                if termo: obs_parts.append(f"Termo: {termo}")
+
+                nf = get_val(['Nota Fiscal'])
+                if nf: obs_parts.append(f"NF: {nf}")
+
+                observacoes_finais = " | ".join(obs_parts) if obs_parts else "📦 CARGA EM LOTE: Importado da Antiga Planilha CSV."
+
+                # 4. Criando Entidade Principal
                 novo_ativo = Ativo(
                     patrimonio=patrimonio,
-                    numero_serie=row['SERIAL'] if row['SERIAL'] else None,
-                    marca=row['MARCA'],
-                    modelo=row['MODELO'],
+                    numero_serie=get_val(['Numero de série', 'Número de série', 'SERIAL', 'Serial']),
+                    marca=get_val(['Marca', 'MARCA']),
+                    modelo=get_val(['Modelo', 'MODELO']),
                     status=status_atual,
                     categoria_id=categoria.id,
                     local_id=local.id,
                     colaborador_id=colaborador_id,
                     especificacoes_tecnicas=especificacoes,
-                    observacoes="📦 CARGA EM LOTE: Importado da Antiga Planilha CSV."
+                    observacoes=observacoes_finais
                 )
                 db.add(novo_ativo)
                 await db.flush() # Salva rapido para gerar uuid
@@ -109,10 +163,11 @@ async def rodar_carga():
                 sucesso += 1
 
             except Exception as e:
-                print(f"Erro na linha {index} ({row['PATRIMONIO']}): {e}")
+                patrimonio_err = get_val(['Nome da máquina', 'Nome da máqu', 'PATRIMONIO']) or 'Desconhecido'
+                print(f"Erro na linha {index} (Ativo: {patrimonio_err}): {e}")
                 falhas += 1
                 
-        # Commita a Transação (Transacional: Ou tudo, ou nada - Segurança ACID)
+        # Commita a Transação (Segurança ACID)
         await db.commit()
         print(f"CARGA FINALIZADA! {sucesso} Ativos Portados com Sucesso. Falhas: {falhas}")
 
